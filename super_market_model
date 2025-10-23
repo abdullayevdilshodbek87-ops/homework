@@ -1,0 +1,147 @@
+from products_model import Product
+from user_model import Admin, Customer
+
+class Shop:
+    def __init__(self):
+        self.products = []
+        self.admins = []
+        self.customers = []
+        self.balance = 0
+
+    def add_product(self, product):
+        self.products.append(product)
+
+    def add_admin(self, admin):
+        self.admins.append(admin)
+
+    def add_customer(self, customer):
+        self.customers.append(customer)
+
+    def find_product(self, product_name):
+        for product in self.products:
+            if product.name.lower() == product_name.lower():
+                return product
+        return None
+
+    def find_admin(self, name):
+        for admin in self.admins:
+            if admin.name.lower() == name.lower():
+                return admin
+        return None
+
+    def show_products(self):
+        if not self.products:
+            print("Mahsulotlar mavjud emas.")
+            return
+        print("\n Mahsulotlar ro'yxati:")
+        for p in self.products:
+            print(f"- {p.name} | Narxi: {p.price} | Miqdori: {p.quantity}")
+        print()
+
+
+def admin_panel(shop):
+    while True:
+        print("\n--- ADMIN PANEL ---")
+        print("1. Mahsulotlarni ko‘rish")
+        print("2. Mahsulot qo‘shish")
+        print("3. Supermarket balansini ko‘rish")
+        print("4. Mahsulotni o‘zgartirish")
+        print("5. Mahsulotni o‘chirish")
+        print("0. Orqaga")
+
+        tanlov = input("Tanlang (0-5): ")
+
+        if tanlov == "1":
+            shop.show_products()
+
+        elif tanlov == "2":
+            nom = input("Mahsulot nomi: ")
+            narx = int(input("Narxi: "))
+            miqdor = int(input("Miqdori: "))
+            shop.add_product(Product(nom, narx, miqdor))
+            print(f"{nom} muvaffaqiyatli qo‘shildi!")
+
+        elif tanlov == "3":
+            print(f" Supermarket balansi: {shop.balance} so'm")
+
+        elif tanlov == "4":
+            shop.show_products()
+            mahsulot_nomi = input("O‘zgartiriladigan mahsulot nomi: ")
+            product = shop.find_product(mahsulot_nomi)
+            if product:
+                yangi_narx = int(input(f"{product.name} yangi narxi (hozirgi: {product.price}): "))
+                yangi_miqdor = int(input(f"{product.name} yangi miqdori (hozirgi: {product.quantity}): "))
+                product.price = yangi_narx
+                product.quantity = yangi_miqdor
+                print(f"{product.name} yangilandi!")
+            else:
+                print("Mahsulot topilmadi.")
+
+        elif tanlov == "5":
+            shop.show_products()
+            mahsulot_nomi = input("O‘chiriladigan mahsulot nomi: ")
+            product = shop.find_product(mahsulot_nomi)
+            if product:
+                shop.products.remove(product)
+                print(f"{product.name} o‘chirildi!")
+            else:
+                print("Mahsulot topilmadi.")
+
+        elif tanlov == "0":
+            break
+        else:
+            print("Noto‘g‘ri tanlov!")
+
+
+def admin_login(shop):
+    print("\n--- Admin Kirish ---")
+    ism = input("Ismingiz: ")
+    parol = input("Parolingiz: ")
+
+    admin = shop.find_admin(ism)
+    if admin and admin.password == parol:
+        print(f"\n Xush kelibsiz, {admin.name}!")
+        admin_panel(shop)
+    else:
+        print(" Ism yoki parol noto‘g‘ri.")
+
+
+def customer_panel(shop):
+    print("\n--- XARIDOR PANELI ---")
+    print("Xaridorlar:")
+    for i, customer in enumerate(shop.customers):
+        print(f"{i+1}. {customer.name} ({customer.phone}) - Balans: {customer.balance} so'm")
+
+    tanlov = int(input("Xaridorni tanlang (raqamini kiriting): ")) - 1
+    if 0 <= tanlov < len(shop.customers):
+        user = shop.customers[tanlov]
+
+        while True:
+            print(f"\n {user.name}, tanlang:")
+            print("1. Mahsulotlarni ko‘rish")
+            print("2. Savatga mahsulot qo‘shish")
+            print("3. Savatni ko‘rish")
+            print("4. Xaridni yakunlash (checkout)")
+            print("0. Orqaga")
+
+            sub_tanlov = input("Tanlov: ")
+
+            if sub_tanlov == "1":
+                shop.show_products()
+            elif sub_tanlov == "2":
+                shop.show_products()
+                nom = input("Mahsulot nomi: ")
+                miqdor = int(input("Nechta? "))
+                user.add_product_to_cart(shop, nom, miqdor)
+            elif sub_tanlov == "3":
+                user.show_cart()
+            elif sub_tanlov == "4":
+                user.checkout(shop)
+                shop.show_products()
+            elif sub_tanlov == "0":
+                break
+            else:
+                print(" Noto‘g‘ri tanlov!")
+        else:
+            print("Noto‘g‘ri raqam tanlandi.")
+

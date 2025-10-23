@@ -1,0 +1,85 @@
+from products_model import Product
+
+class User:
+    def __init__(self, name, phone):
+        self.name = name
+        self.phone = phone
+
+
+class Admin(User):
+    def __init__(self, name, phone, password):
+        super().__init__(name, phone)
+        self.password = password
+
+
+class Customer(User):
+    def __init__(self, name, phone, balance):
+        super().__init__(name, phone)
+        self.balance = balance
+        self.cart = []
+
+    def add_product_to_cart(self, shop, product_name, quantity):
+        product = shop.find_product(product_name)
+        if not product:
+            print(f"{product_name} mavjud emas.")
+            return
+
+        if quantity > product.quantity:
+            print(f"{product.name} dan faqat {product.quantity} dona mavjud.")
+            return
+
+        for item in self.cart:
+            if item["name"].lower() == product.name.lower():
+                item["quantity"] += quantity
+                item["total"] = item["price"] * item["quantity"]
+                print(f"{quantity} dona {product.name} savatga qo‘shildi (yangilandi).")
+                return
+
+        self.cart.append({
+            "name": product.name,
+            "price": product.price,
+            "quantity": quantity,
+            "total": product.price * quantity
+        })
+
+        print(f"{quantity} dona {product.name} savatga qo‘shildi.")
+
+    def show_cart(self):
+        if not self.cart:
+            print("Savat bo‘sh.")
+            return
+
+        print("\n Savat tarkibi:")
+        for item in self.cart:
+            print(f"- {item['name']} | {item['quantity']} dona | {item['price']} so'm | Jami: {item['total']} so'm")
+        total_sum = sum(item["total"] for item in self.cart)
+        print(f"Umumiy summa: {total_sum} so'm\n")
+
+    def checkout(self, shop):
+        if not self.cart:
+            print("Savat bo‘sh.")
+            return
+
+        total_sum = sum(item["total"] for item in self.cart)
+
+        if self.balance < total_sum:
+            print(f"Sizning balansingiz yetarli emas. Xarid summasi: {total_sum} so'm, sizda: {self.balance} so'm")
+            return
+
+        for item in self.cart:
+            product = shop.find_product(item["name"])
+            if product:
+                product.quantity -= item["quantity"]
+
+        self.balance -= total_sum
+        shop.balance += total_sum
+
+        print(f"\nXarid yakunlandi! Umumiy summa: {total_sum} so'm")
+        print("Savat:")
+        for item in self.cart:
+            print(f"- {item['name']} | {item['quantity']} dona | {item['total']} so'm")
+
+        print(f"\nYangi balansingiz: {self.balance} so'm")
+        print(f"Supermarket balansi: {shop.balance} so'm\n")
+
+        self.cart.clear()

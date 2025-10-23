@@ -1,0 +1,39 @@
+from super_market_model import Shop, admin_login, customer_panel
+from products_model import Product
+from user_model import Admin, Customer
+
+def main():
+    shop = Shop()
+
+    shop.add_product(Product("Non", 3000, 100))
+    shop.add_product(Product("Sut", 8000, 50))
+    shop.add_product(Product("Shakar", 12000, 30))
+    shop.add_product(Product("Yog'", 15000, 20))
+
+
+    shop.add_admin(Admin("Admin1", "+998901112233", "123"))
+    shop.add_admin(Admin("Admin2", "+998901112238", "111"))
+
+
+    shop.add_customer(Customer("Ali", "+998901112244", 50000))
+    shop.add_customer(Customer("Vali", "+998901112255", 25000))
+
+    while True:
+        print("\n========== SUPERMARKET TIZIMI ==========")
+        print("1. Admin sifatida kirish")
+        print("2. Xaridor sifatida kirish")
+        print("0. Chiqish")
+        tanlov = input("Tanlang (1/2/0): ")
+
+        if tanlov == "1":
+            admin_login(shop)
+        elif tanlov == "2":
+            customer_panel(shop)
+        elif tanlov == "0":
+            print(" Dasturdan chiqildi.")
+            break
+        else:
+            print("Noto‘g‘ri tanlov!")
+
+if __name__ == "__main__":
+    main()
